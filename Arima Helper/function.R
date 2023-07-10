@@ -69,7 +69,7 @@ manual_arima <- function(data, p, d, q, s, P = NULL, D = NULL, Q = NULL) {
     paste0("(", x[1], ", ", x[2], ", ", x[3], ") (", x[4], ", ", x[5], ", ", x[6], ") ")
   })
   
-  df <- data.frame("Parameter (ARIMA Order)" = parameter_combinations)
+  df <- data.frame(Parameter = parameter_combinations)
   df$"Status" = as.vector(status)
   df$"Coefficient Test" = as.vector(coef_test)
   df$"Ljung-Box Test" = as.vector(ljung_test)
