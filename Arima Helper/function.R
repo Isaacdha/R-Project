@@ -3,10 +3,6 @@ library(tseries)
 library(TSA)
 library(readxl)
 
-data_awal <- read_excel('D:/[R]ecent/New/Data.xlsx'
-                        , sheet = "pesawat")
-ts_data <- ts(data_awal['pesawat'])
-
 generate_combinations <- function(p, d, q, P = NULL, D = NULL, Q = NULL) {
   # Filter combinations where p and q are both 0
   if (is.null(P) || is.null(D) || is.null(Q)) {
