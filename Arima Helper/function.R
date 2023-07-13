@@ -13,7 +13,7 @@ stationarity_test_transform <- function(ts.data) {
   lambda_list <- c(lambda)
   trans.data <- ts.data
   
-  while (abs(tail(lambda_list, n = 1) - 1) > 0.05) {
+  while (abs(tail(lambda_list, n = 1) - 1) > 0.1) {
     trans.data <- BoxCox(trans.data, tail(lambda_list, n = 1))
     lambda_list <- append(lambda_list, BoxCox.lambda(trans.data))
   }
