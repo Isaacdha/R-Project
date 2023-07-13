@@ -1,10 +1,11 @@
+# Required Library
 library(forecast)
 library(tseries)
 library(TSA)
 library(readxl)
 library(dplyr)
 
-#-------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------
 
 # Transformation Function
 stationarity_test_transform <- function(ts.data) {
@@ -36,7 +37,7 @@ stationarity_test_transform <- function(ts.data) {
   return(listed)
 }
 
-#-------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------
 
 # Combination Generation Function
 generate_combinations <- function(p, d, q, P = NULL, D = NULL, Q = NULL) {
@@ -57,8 +58,8 @@ generate_combinations <- function(p, d, q, P = NULL, D = NULL, Q = NULL) {
   return(as.matrix(combinations))
 }
 
-#-------------------------------------------------------------------------------
-# In Detector
+#--------------------------------------------------------------------------------------------------------------------------------------
+# Lag Sequence Detector
 containsMultiples <- function(arr, num) {
   target_numbers <- num * c(1, 2, 3)
   
@@ -67,6 +68,7 @@ containsMultiples <- function(arr, num) {
   return(result)
 }
 
+# Seasonal Lag Detector
 divide_and_filter <- function(arr, num) {
   divided <- arr / num
   rounded <- round(divided)
@@ -76,9 +78,23 @@ divide_and_filter <- function(arr, num) {
   return(integer_divisions)
 }
 
-# Lag Detector
+# Add Zero in Array Function
+addZero <- function(inputArray) {
+  if (length(inputArray) == 0) {
+    return(0)
+  } else {
+    return(c(0, inputArray))
+  }
+}
+
+# Lag Detector, Auto Transform if Non-Stationary
 order_detector <- function(data, lag, s = NULL){
   data.trans <- data
+  acf.positions <- c()
+  pacf.positions <- c()
+  sacf.positions <- c()
+  spacf.positions <- c()
+  
   ## Non-Seasonal
   acf_val <- acf(data, lag.max = lag, plot = FALSE)$acf
   cv <- 1.96/sqrt(length(data))
@@ -115,16 +131,18 @@ order_detector <- function(data, lag, s = NULL){
   # Iterate over each array
   sacf.positions <- divide_and_filter(sacf.positions, s)
   spacf.positions <- divide_and_filter(spacf.positions, s)
-  
-  print(sacf.positions)
-  print(spacf.positions)
-  
+
+  acf.positions <- addZero(acf.positions)
+  pacf.positions <- addZero(pacf.positions)
+  sacf.positions <- addZero(sacf.positions)
+  spacf.positions <- addZero(spacf.positions)
+
   listed <- list("p" = pacf.positions, "d" = d, "q" = acf.positions, 
                  "P" = spacf.positions, "D" = D, "Q" = sacf.positions)
   return(listed)
 }
 
-# Tentative Model Check ARIMA
+# Tentative Model List & Check
 manual_arima <- function(data, p, d, q, s = NULL, 
                          P = NULL, D = NULL, Q = NULL, 
                          xreg = NULL) {
@@ -268,7 +286,7 @@ model_selector <- function(arima_list){
 
 #-------------------------------------------------------------------------------
 
-# Convert Balik
+# Transform Back the Transformed Data & Plot
 transform_back <- function(forecast_object, lambda){
   n <- length(lambda)
   for (i in 1:length(lambda)-1) {
