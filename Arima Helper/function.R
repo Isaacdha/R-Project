@@ -289,11 +289,11 @@ model_selector <- function(arima_list){
 # Transform Back the Transformed Data & Plot
 transform_back <- function(forecast_object, lambda){
   n <- length(lambda)
-  for (i in 1:length(lambda)-1) {
-    forecast_object$upper <- InvBoxCox(forecast_object$upper, lambda[n-i])
-    forecast_object$lower <- InvBoxCox(forecast_object$lower, lambda[n-i])
-    forecast_object$mean <- InvBoxCox(forecast_object$mean, lambda[n-i])
-    forecast_object$x <- InvBoxCox(forecast_object$x, lambda[n-i])
-  }
+  
+  forecast_object$upper <- InvBoxCox(forecast_object$upper, lambda[n])
+  forecast_object$lower <- InvBoxCox(forecast_object$lower, lambda[n])
+  forecast_object$mean <- InvBoxCox(forecast_object$mean, lambda[n])
+  forecast_object$x <- InvBoxCox(forecast_object$x, lambda[n])
+  
   return(forecast_object)
 }
