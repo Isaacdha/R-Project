@@ -1,21 +1,26 @@
 library(readxl)
 library(ggplot2)
 library(forecast)
+library(ggeasy)
 library(dplyr)
+theme_update(plot.title = element_text(hjust = 0.5))
+theme_update(text = element_text(size = 30))
 options(warn = -1)
 
 # Function to plot fitted vs. actual and forecast
-plot_forecast <- function(model, fitted_title, forecast_title, ts_data, 
+plot_forecast <- function(model, forecastnum, fitted_title, forecast_title, ts_data, 
                           x_axis_name, y_axis_name, include_fitted_in_forecast, 
-                          xrange, yrange, CI) {
+                          xrange, yrange, CI, legendtitle, actuallegend,
+                          fittedlegend, forecastlegend) {
   fitted_data <- fitted(model)
-  forecast_data <- forecast(model, h = 60)
+  forecast_data <- forecast(model, h = forecastnum)
   
   # Plot Fitted vs Actual
-  p1 <- autoplot(ts_data, series = "Actual") +
-    autolayer(fitted_data, series = "Fitted", PI = FALSE) +
-    labs(title = fitted_title, x = x_axis_name, y = y_axis_name, colour = "Legend") +
-    theme_minimal()
+  p1 <- autoplot(ts_data, series = actuallegend) +
+    autolayer(fitted_data, series = fittedlegend, PI = FALSE) +
+    labs(title = fitted_title, x = x_axis_name, y = y_axis_name, colour = legendtitle) +
+    theme_minimal() + ggeasy::easy_center_title() +
+    scale_y_continuous(labels = scales::comma)
   
   # Apply x and y axis limits if specified
   if (!is.null(xrange)) {
@@ -26,23 +31,23 @@ plot_forecast <- function(model, fitted_title, forecast_title, ts_data,
   }
   
   # Plot Forecast
-  p2 <- autoplot(ts_data, series = "Actual") +
-    autolayer(forecast_data, series = "Forecast", PI = CI)
+  p2 <- autoplot(ts_data, series = actuallegend) +
+    autolayer(forecast_data, series = forecastlegend, PI = CI) +
+    labs(title = forecast_title, x = x_axis_name, y = y_axis_name, colour = legendtitle) +
+    theme_minimal() + ggeasy::easy_center_title() +
+    scale_y_continuous(labels = scales::comma)
   
   if (include_fitted_in_forecast) {
-    p2 <- p2 + autolayer(fitted_data, series = "Fitted", PI = FALSE)
+    p2 <- p2 + autolayer(fitted_data, series = fittedlegend, PI = FALSE)
   }
   
   # Apply x and y axis limits if specified
   if (!is.null(xrange)) {
-    p2 <- p2 + xlim(xrange)
+    p2 <- p2 + coord_cartesian(xlim = xrange)
   }
   if (!is.null(yrange)) {
-    p2 <- p2 + ylim(yrange)
+    p2 <- p2 + coord_cartesian(ylim = yrange)
   }
-  
-  p2 <- p2 + labs(title = forecast_title, x = x_axis_name, y = y_axis_name, colour = "Legend") +
-    theme_minimal()
   
   return(list(fitted_plot = p1, forecast_plot = p2))
 }
@@ -54,7 +59,11 @@ exponential_smoothing <- function(ts_data, method, h = 60,
                                   fitted_title = NULL, forecast_title = NULL, 
                                   x_axis_name = NULL, y_axis_name = NULL, 
                                   include_fitted_in_forecast = FALSE, 
-                                  xrange = NULL, yrange = NULL, CI = TRUE) {
+                                  xrange = NULL, yrange = NULL, CI = TRUE, 
+                                  legendtitle = "Legend", 
+                                  actuallegend = "Actual",
+                                  fittedlegend = "Fitted", 
+                                  forecastlegend = "Forecast") {
   if (method == "single") {
     model <- ses(ts_data, h = h, alpha = alpha)
     default_title <- "Single Exponential Smoothing"
@@ -74,7 +83,10 @@ exponential_smoothing <- function(ts_data, method, h = 60,
   fitted_title <- ifelse(is.null(fitted_title), paste(default_title, "- Fitted vs Actual"), fitted_title)
   forecast_title <- ifelse(is.null(forecast_title), paste(default_title, "- Forecast"), forecast_title)
   
-  plots <- plot_forecast(model, fitted_title, forecast_title, ts_data, x_axis_name, y_axis_name, include_fitted_in_forecast, xrange, yrange, CI)
+  plots <- plot_forecast(model, h, fitted_title, forecast_title, ts_data, 
+                         x_axis_name, y_axis_name, include_fitted_in_forecast, 
+                         xrange, yrange, CI, legendtitle, actuallegend,
+                         fittedlegend, forecastlegend)
   
   fitted_values <- fitted(model)
   forecast_values <- forecast(model, h = h)
