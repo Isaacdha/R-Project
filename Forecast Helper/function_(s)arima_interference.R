@@ -321,6 +321,82 @@ model_selector <- function(arima_list){
 }
 
 ################################################################################
+# Plotting Forecasted Value & Etc
+################################################################################
+# Plot
+plot_arima_forecast <- function(forecast_object, 
+                                actual_title = "Actual Data Plot",
+                                fitted_title = "ARIMA - Fitted vs Actual",
+                                forecast_title = "ARIMA - Forecast",
+                                x_axis_name = "Time",
+                                y_axis_name = "Value",
+                                include_fitted_in_forecast = FALSE,
+                                xrange = NULL,
+                                yrange = NULL,
+                                CI = TRUE,
+                                legendtitle = "Legend",
+                                actuallegend = "Actual",
+                                fittedlegend = "Fitted",
+                                forecastlegend = "Forecast") {
+  
+  # Extract data from forecast object
+  actual_data <- forecast_object$x
+  fitted_data <- forecast_object$fitted
+  forecast_data <- forecast_object$mean
+  
+  # Create time index for all data
+  time_index <- time(actual_data)
+  forecast_time_index <- time(forecast_data)
+  
+  # Combine actual and forecast data
+  all_data <- ts(c(actual_data, forecast_data), start = start(actual_data), frequency = frequency(actual_data))
+  
+  # Plot 1: Actual Data
+  p1 <- autoplot(actual_data, series = actuallegend) +
+    labs(title = actual_title, x = x_axis_name, y = y_axis_name, colour = legendtitle) +
+    theme_minimal() + ggeasy::easy_center_title() +
+    scale_y_continuous(labels = scales::comma) +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
+  
+  # Plot 2: Fitted vs Actual
+  p2 <- autoplot(actual_data, series = actuallegend) +
+    autolayer(fitted_data, series = fittedlegend) +
+    labs(title = fitted_title, x = x_axis_name, y = y_axis_name, colour = legendtitle) +
+    theme_minimal() + ggeasy::easy_center_title() +
+    scale_y_continuous(labels = scales::comma) +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
+  
+  # Plot 3: Forecast
+  p3 <- autoplot(actual_data, series = actuallegend) +
+    autolayer(forecast_object, series = forecastlegend, PI = CI) +
+    labs(title = forecast_title, x = x_axis_name, y = y_axis_name, colour = legendtitle) +
+    theme_minimal() + ggeasy::easy_center_title() +
+    scale_y_continuous(labels = scales::comma) +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
+  
+  if (!include_fitted_in_forecast) {
+    p3 <- p3 - autolayer(fitted_data, series = fittedlegend)
+  }
+  
+  # Apply xrange and yrange if provided
+  if (!is.null(xrange)) {
+    p1 <- p1 + xlim(xrange)
+    p2 <- p2 + xlim(xrange)
+    p3 <- p3 + xlim(xrange)
+  }
+  if (!is.null(yrange)) {
+    p1 <- p1 + ylim(yrange)
+    p2 <- p2 + ylim(yrange)
+    p3 <- p3 + ylim(yrange)
+  }
+  
+  return(list(actual_plot = p1, fitted_plot = p2, forecast_plot = p3))
+}
+
+################################################################################
 # Unfinished Features
 ################################################################################
 # Lag Sequence Detector
