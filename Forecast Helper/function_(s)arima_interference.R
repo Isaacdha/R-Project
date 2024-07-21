@@ -12,6 +12,7 @@ library(zoo)
 
 theme_update(plot.title = element_text(hjust = 0.5))
 theme_update(text = element_text(size = 13))
+options(scipen = 999)
 options(warn = -1)
 
 ################################################################################
@@ -377,6 +378,7 @@ plot_arima_forecast <- function(forecast_object,
   
   # Plot 3: Forecast
   p3 <- autoplot(actual_data, series = actuallegend) +
+    autolayer(fitted_data, series = fittedlegend) +
     autolayer(forecast_object, series = forecastlegend, PI = CI) +
     labs(title = forecast_title, x = x_axis_name, y = y_axis_name, colour = legendtitle) +
     theme_minimal() + ggeasy::easy_center_title() +
