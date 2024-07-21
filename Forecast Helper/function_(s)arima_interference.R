@@ -6,6 +6,13 @@ library(tseries)
 library(TSA)
 library(readxl)
 library(dplyr)
+library(ggplot2)
+library(ggeasy)
+library(zoo)
+
+theme_update(plot.title = element_text(hjust = 0.5))
+theme_update(text = element_text(size = 13))
+options(warn = -1)
 
 ################################################################################
 # Transformation Function
