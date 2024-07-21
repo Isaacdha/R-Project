@@ -74,12 +74,14 @@ transform_back <- function(forecast_object, lambda_scale_list) {
     forecast_object$lower <- InvBoxCox(forecast_object$lower, lambda)
     forecast_object$mean <- InvBoxCox(forecast_object$mean, lambda)
     forecast_object$x <- InvBoxCox(forecast_object$x, lambda)
+    forecast_object$fitted <- InvBoxCox(forecast_object$fitted, lambda)
   } else {
     for (i in seq_along(lambda_list)) {
       forecast_object$upper <- InvBoxCox(forecast_object$upper, lambda_list[i])
       forecast_object$lower <- InvBoxCox(forecast_object$lower, lambda_list[i])
       forecast_object$mean <- InvBoxCox(forecast_object$mean, lambda_list[i])
       forecast_object$x <- InvBoxCox(forecast_object$x, lambda_list[i])
+      forecast_object$fitted <- InvBoxCox(forecast_object$fitted, lambda_list[i])
     }
   }
   
@@ -88,6 +90,7 @@ transform_back <- function(forecast_object, lambda_scale_list) {
   forecast_object$lower <- forecast_object$lower / scale
   forecast_object$mean <- forecast_object$mean / scale
   forecast_object$x <- forecast_object$x / scale
+  forecast_object$fitted <- forecast_object$fitted / scale
   
   return(forecast_object)
 }
